@@ -34,15 +34,37 @@ FEATURES = ["Type", *NUMERIC]
 
 
 def load_data():
-    """Fetch the original UCI data; keep download separate and explicit for reproducibility."""
-    try:
-        from ucimlrepo import fetch_ucirepo
-    except ImportError as exc:
-        raise SystemExit("Install requirements first: pip install -r requirements.txt") from exc
-    dataset = fetch_ucirepo(id=601)
-    frame = pd.concat([dataset.data.features, dataset.data.targets], axis=1)
+    """Fetch the original UCI data or load local cache; keep download explicit for reproducibility."""
+    local_csv = Path("ai4i2020.csv")
+    if local_csv.exists():
+        frame = pd.read_csv(local_csv)
+    else:
+        try:
+            from ucimlrepo import fetch_ucirepo
+        except ImportError as exc:
+            raise SystemExit("Install requirements first: pip install -r requirements.txt") from exc
+        dataset = fetch_ucirepo(id=601)
+        frame = pd.concat([dataset.data.features, dataset.data.targets], axis=1)
+    
     # Normalize column whitespace to protect against CSV/API formatting differences.
     frame.columns = [str(c).strip() for c in frame.columns]
+    # Standardize column names with unit brackets
+    rename_map = {}
+    for col in frame.columns:
+        c_lower = col.lower()
+        if "air temp" in c_lower:
+            rename_map[col] = "Air temperature [K]"
+        elif "process temp" in c_lower:
+            rename_map[col] = "Process temperature [K]"
+        elif "rotational speed" in c_lower:
+            rename_map[col] = "Rotational speed [rpm]"
+        elif "torque" in c_lower:
+            rename_map[col] = "Torque [Nm]"
+        elif "tool wear" in c_lower:
+            rename_map[col] = "Tool wear [min]"
+        elif "machine failure" in c_lower:
+            rename_map[col] = "Machine failure"
+    frame = frame.rename(columns=rename_map)
     return frame
 
 

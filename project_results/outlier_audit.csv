@@ -1,0 +1,6 @@
+sensor,iqr_candidate_count,lower_fence,upper_fence
+Air temperature [K],0,293.5,306.29999999999995
+Process temperature [K],0,305.35,314.55000000000007
+Rotational speed [rpm],418,1139.5,1895.5
+Torque [Nm],69,12.800000000000011,67.19999999999999
+Tool wear [min],0,-110.5,325.5
